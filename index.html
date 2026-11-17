@@ -1,1012 +1,524 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3D Market — IDZX</title>
+<title>IDZX MARKET</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-:root {
-  --bg: #080d1b; --card: rgba(20,29,49,0.88); --border: rgba(148,163,184,0.18);
-  --accent: #67e8f9; --text: #f8fafc; --muted: #9aa9bf;
-  --accent2: #818cf8; --surface: rgba(255,255,255,0.045);
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
+
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: var(--bg); color: var(--text); min-height: 100vh;
-  background-image: radial-gradient(ellipse at 12% 0%, rgba(34,211,238,0.13), transparent 42%),
-                    radial-gradient(ellipse at 90% 80%, rgba(99,102,241,0.12), transparent 46%);
-  padding-bottom: 70px;
+    background: #0b0b10;
+    color: #fff;
+    font-family: Arial, sans-serif;
 }
-.auth-screen { display: grid; place-items: center; min-height: 100vh; padding: 20px; }
-.auth-box {
-  background: linear-gradient(145deg, rgba(24,36,60,.96), rgba(13,20,37,.96));
-  border: 1px solid var(--border); border-radius: 22px;
-  padding: 32px 28px; width: 100%; max-width: 420px; backdrop-filter: blur(16px);
-  box-shadow: 0 24px 80px rgba(0,0,0,.38);
+
+header {
+    height: 70px;
+    background: #12121a;
+    border-bottom: 1px solid #262633;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 7%;
 }
-.auth-box h1 { text-align: center; margin-bottom: 24px; font-size: 1.6rem; }
-.auth-box h1 span { color: var(--accent); }
-.auth-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-.auth-tabs button {
-  flex: 1; padding: 10px; border: none; background: rgba(255,255,255,0.06);
-  color: var(--text); border-radius: 10px; cursor: pointer; font-weight: 500;
+
+.logo {
+    font-size: 23px;
+    font-weight: bold;
+    color: #a879ff;
 }
-.auth-tabs button.active { background: rgba(34,211,238,0.2); color: var(--accent); }
-.form-group { margin-bottom: 14px; }
-.form-group label { display: block; margin-bottom: 6px; font-size: 0.9rem; color: var(--muted); }
-.form-group input, .form-group select, .form-group textarea {
-  width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.06);
-  border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 1rem;
+
+button {
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 11px 17px;
+    font-weight: bold;
+    color: white;
+    background: #824cff;
 }
-.btn {
-  width: 100%; padding: 12px; border: none; border-radius: 10px; cursor: pointer;
-  font-weight: 600; background: var(--accent); color: #0f172a; margin-top: 8px;
+
+button:hover {
+    background: #986dff;
 }
-.btn:hover { filter: brightness(1.08); }
-.error { color: #f87171; font-size: 0.85rem; margin-top: 8px; text-align: center; min-height: 1.2em; }
-.app { display: none; }
-.app.visible { display: block; }
-.header {
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: 12px 16px; background: rgba(15,23,42,0.7); backdrop-filter: blur(12px);
-  border: 1px solid var(--border); border-radius: 16px; margin: 12px 16px;
+
+.secondary {
+    background: #252532;
 }
-.logo { font-size: 1.35rem; font-weight: 700; }
-.logo span { color: var(--accent); }
-.header-right { display: flex; align-items: center; gap: 12px; }
-.balance { font-weight: 600; color: var(--accent); }
-.avatar, .notif-btn {
-  width: 42px; height: 42px; border-radius: 50%;
-  background: linear-gradient(135deg, #22d3ee, #6366f1);
-  display: grid; place-items: center; font-weight: 700; cursor: pointer; border: none; color: #fff; position: relative;
+
+main {
+    max-width: 1200px;
+    margin: 35px auto;
+    padding: 0 20px;
 }
-.avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.notif-badge {
-  position: absolute; top: -2px; right: -2px; background: #ef4444; color: #fff;
-  font-size: 0.65rem; font-weight: 700; border-radius: 50%; min-width: 16px; height: 16px;
-  display: none; align-items: center; justify-content: center;
+
+.hero {
+    background: linear-gradient(120deg, #211638, #11111b);
+    border: 1px solid #35264e;
+    padding: 35px;
+    border-radius: 15px;
+    margin-bottom: 30px;
 }
-.search { position: relative; margin: 0 16px 12px; }
-.search input {
-  width: 100%; padding: 12px 16px 12px 42px;
-  background: rgba(255,255,255,0.06); border: 1px solid var(--border);
-  border-radius: 12px; color: var(--text); font-size: 1rem;
+
+.hero h1 {
+    font-size: 32px;
+    margin-bottom: 12px;
 }
-.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); opacity: 0.5; }
-.grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 12px 20px;
+
+.hero p {
+    color: #aaa;
 }
-.card {
-  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-  overflow: hidden; cursor: pointer; display: flex; flex-direction: column;
+
+h2 {
+    margin: 25px 0 18px;
 }
-.card:hover { transform: translateY(-2px); }
-.card-canvas { width: 100%; height: 90px; display: block; }
-.card-info { padding: 8px 10px; font-size: 0.8rem; }
-.card-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.card-price { color: var(--accent); font-weight: 700; }
-.empty { text-align: center; color: var(--muted); padding: 40px 16px; grid-column: 1 / -1; }
-.bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
-  background: rgba(15,23,42,0.95); backdrop-filter: blur(12px);
-  border-top: 1px solid var(--border);
-  display: flex; z-index: 100;
+
+.products {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 18px;
 }
-.nav-btn {
-  flex: 1; border: none; background: transparent; color: var(--muted);
-  font-size: 0.75rem; font-weight: 500; cursor: pointer;
+
+.product {
+    background: #15151f;
+    border: 1px solid #292938;
+    border-radius: 12px;
+    padding: 17px;
 }
-.nav-btn.active { color: var(--accent); }
-.admin-btn {
-  position: fixed; bottom: 72px; right: 16px; z-index: 90;
-  padding: 12px 16px; width: auto; border-radius: 12px;
+
+.product-preview {
+    height: 140px;
+    background: #222230;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 45px;
+    margin-bottom: 15px;
 }
+
+.product h3 {
+    margin-bottom: 8px;
+}
+
+.product p {
+    color: #aaa;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.price {
+    color: #b38aff;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
 .modal {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
-  display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px;
-}
-.modal.show { display: flex; }
-.modal-content {
-  background: #1e293b; border: 1px solid var(--border); border-radius: 20px;
-  padding: 20px; max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto;
-}
-.viewer-canvas { width: 100%; height: 220px; border-radius: 12px; margin-bottom: 12px; }
-@media (max-width: 600px) {
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-  .card-canvas { height: 80px; }
-  .header { margin: 8px; padding: 10px; }
-  .search { margin: 0 8px 12px; }
-}
-button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-  outline: 2px solid var(--accent); outline-offset: 2px;
+    position: fixed;
+    inset: 0;
+    background: #000c;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
 }
 
-.auth-tabs button, .nav-btn, .header button, .btn {
-  transition: transform .16s ease, filter .16s ease, background .16s ease, border-color .16s ease;
+.modal-box {
+    background: #171722;
+    border: 1px solid #38384a;
+    border-radius: 14px;
+    padding: 25px;
+    width: 100%;
+    max-width: 390px;
 }
-.btn { box-shadow: 0 8px 24px rgba(34,211,238,.12); }
-.btn:active, .nav-btn:active { transform: scale(.98); }
-.form-group input, .form-group select, .form-group textarea {
-  background: rgba(7,13,27,.72); border-color: rgba(148,163,184,.22);
-}
-.modal-content { background: linear-gradient(155deg, #17233b, #0d1528); border:1px solid var(--border); }
 
+.modal-box h2 {
+    margin: 0 0 20px;
+}
+
+input {
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 12px;
+    background: #0d0d14;
+    border: 1px solid #363646;
+    border-radius: 8px;
+    color: white;
+    outline: none;
+}
+
+input:focus {
+    border-color: #824cff;
+}
+
+.modal-box button {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.close {
+    float: right;
+    cursor: pointer;
+    color: #aaa;
+    font-size: 22px;
+}
+
+#userPanel {
+    display: none;
+    background: #15151f;
+    border: 1px solid #292938;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.muted {
+    color: #999;
+    font-size: 13px;
+    margin-top: 7px;
+}
+
+#status {
+    margin-top: 12px;
+    color: #b38aff;
+    font-size: 13px;
+}
+
+footer {
+    text-align: center;
+    color: #666;
+    padding: 40px 15px;
+}
+
+@media(max-width:600px) {
+    header {
+        padding: 0 15px;
+    }
+
+    .hero h1 {
+        font-size: 25px;
+    }
+}
 </style>
 </head>
+
 <body>
 
-<div class="auth-screen" id="authScreen">
-  <div class="auth-box">
-    <h1>3D <span>Market</span></h1>
-    <p style="color:var(--muted);font-size:.82rem;text-align:center;line-height:1.5;margin:-12px 0 20px">
-      Локальная версия: данные хранятся только в этом браузере и на этом устройстве.
-    </p>
-    <div class="auth-tabs">
-      <button id="loginTab" class="active">Вход</button>
-      <button id="regTab">Регистрация</button>
-    </div>
-    <div id="loginForm">
-      <div class="form-group"><label>Username</label><input type="text" id="loginUser" autocomplete="username"></div>
-      <div class="form-group"><label>Пароль</label><input type="password" id="loginPass" autocomplete="current-password"></div>
-      <div style="display:flex;align-items:center;gap:8px;margin:10px 0">
-        <input type="checkbox" id="rememberMe" style="width:auto">
-        <label for="rememberMe" style="margin:0;cursor:pointer">Запомнить устройство</label>
-      </div>
-      <button class="btn" id="doLogin">Войти</button>
-      <div class="error" id="loginError"></div>
-    </div>
-    <div id="regForm" style="display:none">
-      <div class="form-group"><label>Имя</label><input type="text" id="regName"></div>
-      <div class="form-group"><label>Фамилия</label><input type="text" id="regSurname"></div>
-      <div class="form-group"><label>Username</label><input type="text" id="regUser"></div>
-      <div class="form-group"><label>Пароль</label><input type="password" id="regPass"></div>
-      <button class="btn" id="doReg">Зарегистрироваться</button>
-      <div class="error" id="regError"></div>
-    </div>
-    <button class="btn" id="resetData" style="background:#64748b;margin-top:16px;font-size:0.85rem">Сбросить все данные</button>
-  </div>
-</div>
+<header>
+    <div class="logo">IDZX MARKET</div>
 
-<div class="app" id="app">
-  <header class="header">
-    <div class="logo">3D <span>Market</span><small style="display:block;color:var(--muted);font-size:.62rem;letter-spacing:.12em;font-weight:600">IDZX MARKETPLACE</small></div>
-    <div class="header-right">
-      <button class="notif-btn" id="notifBtn">🔔<span class="notif-badge" id="notifBadge">0</span></button>
-      <div class="balance" id="balance">1000 ₽</div>
-      <div class="avatar" id="avatarBtn">И</div>
+    <div id="authButtons">
+        <button class="secondary" onclick="openAuth('login')">Войти</button>
+        <button onclick="openAuth('register')">Регистрация</button>
     </div>
-  </header>
-  <div class="search">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="search" placeholder="Поиск...">
-  </div>
-  <div class="grid" id="grid"></div>
-</div>
 
-<button class="btn admin-btn" id="uploadBtn" style="display:none">+ 3D</button>
+    <div id="loggedButtons" style="display:none">
+        <button class="secondary" onclick="logout()">Выйти</button>
+    </div>
+</header>
 
-<nav class="bottom-nav">
-  <button class="nav-btn active" data-tab="shop">◈ Магазин</button>
-  <button class="nav-btn" data-tab="inventory">▣ Инвентарь</button>
-  <button class="nav-btn" data-tab="market">◇ Маркет</button>
-  <button class="nav-btn" data-tab="following">◎ Подписки</button>
-</nav>
+<main>
 
-<!-- Profile -->
-<div class="modal" id="profileModal">
-  <div class="modal-content">
-    <h2>Профиль</h2>
-    <div class="form-group"><label>Аватар</label><input type="file" id="avatarFile" accept="image/*"></div>
-    <div class="form-group"><label>Имя</label><input type="text" id="nameInput"></div>
-    <div class="form-group"><label>Фамилия</label><input type="text" id="surnameInput"></div>
-    <div class="form-group"><label>Username</label><input type="text" id="usernameInput" readonly>
-      <small id="usernameHint" style="display:block;color:var(--muted);margin-top:5px">Username нельзя изменить.</small>
-    </div>
-    <div class="form-group"><label>Описание</label><textarea id="descInput" rows="3"></textarea></div>
-    <div class="form-group"><label>Валюта</label>
-      <select id="currencySelect"><option value="RUB">₽ Рубли</option><option value="USD">$ Доллары</option><option value="EUR">€ Евро</option></select>
-    </div>
-    <div class="form-group"><label>Язык</label>
-      <select id="langSelect"><option value="ru">Русский</option><option value="en">English</option></select>
-    </div>
-    <div class="form-group"><label>Флаг</label>
-      <select id="flagSelect">
-        <option value="">—</option>
-        <option value="🇷🇺">🇷🇺 Россия</option><option value="🇺🇸">🇺🇸 США</option><option value="🇪🇺">🇪🇺 Европа</option>
-        <option value="🇬🇧">🇬🇧 UK</option><option value="🇩🇪">🇩🇪 Германия</option><option value="🇫🇷">🇫🇷 Франция</option>
-        <option value="🇯🇵">🇯🇵 Япония</option><option value="🇨🇳">🇨🇳 Китай</option><option value="🇰🇷">🇰🇷 Корея</option>
-        <option value="🇨🇦">🇨🇦 Канада</option><option value="🇦🇺">🇦🇺 Австралия</option><option value="🇧🇷">🇧🇷 Бразилия</option>
-        <option value="🇮🇳">🇮🇳 Индия</option><option value="🇹🇷">🇹🇷 Турция</option><option value="🇺🇦">🇺🇦 Украина</option>
-        <option value="🇰🇿">🇰🇿 Казахстан</option>
-      </select>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;margin:10px 0">
-      <input type="checkbox" id="showBalanceCheck" style="width:auto">
-      <label for="showBalanceCheck" style="margin:0">Показывать баланс в профиле</label>
-    </div>
-    <div style="border-top:1px solid var(--border);margin:18px 0 14px;padding-top:16px">
-      <h3 style="font-size:1rem;margin-bottom:12px">Безопасность</h3>
-      <div class="form-group"><label>Текущий пароль</label><input type="password" id="currentPass" autocomplete="current-password"></div>
-      <div class="form-group"><label>Новый пароль</label><input type="password" id="newPass" autocomplete="new-password"></div>
-      <div class="form-group"><label>Повтор нового пароля</label><input type="password" id="confirmPass" autocomplete="new-password"></div>
-      <button class="btn" id="changePassBtn" type="button">Изменить пароль</button>
-      <div class="error" id="securityError"></div>
-    </div>
-    <button class="btn" id="saveProfile">Сохранить</button>
-    <button class="btn" id="logoutBtn" style="background:#ef4444;color:#fff">Выйти</button>
-  </div>
-</div>
+    <section class="hero">
+        <h1>Добро пожаловать в IDZX MARKET</h1>
+        <p>Покупай, продавай и коллекционируй 3D-модели.</p>
+    </section>
 
-<!-- Upload -->
-<div class="modal" id="uploadModal">
-  <div class="modal-content">
-    <h2>Загрузить модель</h2>
-    <div class="form-group"><label>Файл (.glb, до 50 МБ)</label><input type="file" id="modelFile" accept=".glb,model/gltf-binary"></div>
-    <div class="form-group"><label>Название</label><input type="text" id="modelName"></div>
-    <div class="form-group"><label>Цена</label><input type="number" id="modelPrice" min="0" value="100"></div>
-    <div class="form-group"><label>Количество</label><input type="number" id="modelQty" min="1" value="10"></div>
-    <div class="form-group"><label>Редкость</label>
-      <select id="modelRarity">
-        <option value="white">Белый — обычный</option>
-        <option value="green">Зелёный</option>
-        <option value="yellow">Жёлтый</option>
-        <option value="red">Красный</option>
-        <option value="purple">Фиолетовый — легендарный</option>
-      </select>
+    <section id="userPanel">
+        <h2>Мой профиль</h2>
+        <h3 id="username">Пользователь</h3>
+        <p class="muted" id="userEmail"></p>
+        <p class="muted" id="userBalance"></p>
+    </section>
+
+    <h2>Магазин</h2>
+
+    <div class="products" id="products">
+        <p class="muted">Загрузка товаров...</p>
     </div>
-    <button class="btn" id="doUpload">Загрузить</button>
-  </div>
-</div>
 
-<!-- Viewer -->
-<div class="modal" id="viewerModal">
-  <div class="modal-content">
-    <h2 id="viewerTitle">Модель</h2>
-    <canvas class="viewer-canvas" id="viewerCanvas"></canvas>
-    <div id="viewerInfo"></div>
-    <div id="viewerActions"></div>
-  </div>
-</div>
+    <p id="status"></p>
 
-<!-- Notifications -->
-<div class="modal" id="notifModal">
-  <div class="modal-content">
-    <h2>Уведомления</h2>
-    <div id="notifList"></div>
-    <button class="btn" id="clearNotif" style="margin-top:12px">Очистить</button>
-  </div>
+</main>
+
+<footer>
+    IDZX MARKET © 2026
+</footer>
+
+<!-- ОКНО АВТОРИЗАЦИИ -->
+
+<div class="modal" id="authModal">
+    <div class="modal-box">
+
+        <span class="close" onclick="closeAuth()">×</span>
+
+        <h2 id="modalTitle">Вход</h2>
+
+        <div id="registerFields" style="display:none">
+            <input id="regUsername" placeholder="Имя пользователя">
+        </div>
+
+        <input id="email" type="email" placeholder="Электронная почта">
+        <input id="password" type="password" placeholder="Пароль">
+
+        <button onclick="submitAuth()">Продолжить</button>
+
+        <p class="muted" id="authMessage"></p>
+
+    </div>
 </div>
 
 <script>
-const I18N = {
-  ru: { shop:'Магазин', inventory:'Инвентарь', market:'Маркет', following:'Подписки', empty:'Пока пусто', buy:'Купить', sell:'Продать', notEnough:'Недостаточно средств', setPrice:'Цена продажи' },
-  en: { shop:'Shop', inventory:'Inventory', market:'Market', following:'Following', empty:'Empty', buy:'Buy', sell:'Sell', notEnough:'Not enough funds', setPrice:'Sell price' }
-};
-const RARITY_COLORS = { white:'#e5e7eb', green:'#22c55e', yellow:'#eab308', red:'#ef4444', purple:'#a855f7' };
-const RARITY_NAMES = { white:'Обычный', green:'Необычный', yellow:'Редкий', red:'Эпический', purple:'Легендарный' };
+// ======================================
+// SUPABASE CONFIGURATION
+// ======================================
 
-function readStorage(key, fallback) {
-  try {
-    const value = JSON.parse(localStorage.getItem(key) || 'null');
-    return value ?? fallback;
-  } catch (error) {
-    console.warn('Повреждены локальные данные:', key, error);
-    return fallback;
-  }
-}
-// Аккаунты и пароли больше не хранятся в localStorage.
-// Список users используется только как временный кэш найденных профилей.
-let users = [];
-let cloudUsers = [];
-// ВСТАВЬ СЮДА Project URL и Publishable Key из Supabase → Project Settings → API.
-const IDZX_SUPABASE_URL = 'https://alcncjuftdwxoujboiwq.supabase.co';
-const IDZX_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_KqQH_PSPD51cJrHe9HiDqQ_8c2LUqZe';
-const IDZX_API_URL = IDZX_SUPABASE_URL.replace(/\/$/, '') + '/functions/v1/api';
-const IDZX_SESSION_KEY = 'idzx_cloud_session';
+const SUPABASE_URL = "https://alcncjuftdwxoujboiwq.supabase.co";
 
-function cloudConfigured() {
-  return IDZX_SUPABASE_URL.startsWith('https://') &&
-    !IDZX_SUPABASE_URL.includes('ВСТАВЬТЕ') &&
-    IDZX_SUPABASE_PUBLISHABLE_KEY &&
-    !IDZX_SUPABASE_PUBLISHABLE_KEY.includes('ВСТАВЬТЕ');
-}
-async function cloudRequest(action, payload = {}, needsSession = false) {
-  if (!cloudConfigured()) throw new Error('Сначала укажи Project URL и Publishable Key в начале JavaScript.');
-  const token = localStorage.getItem(IDZX_SESSION_KEY) || sessionStorage.getItem(IDZX_SESSION_KEY);
-  const headers = {
-    'Content-Type': 'application/json',
-    'apikey': IDZX_SUPABASE_PUBLISHABLE_KEY
-  };
-  if (needsSession) {
-    if (!token) throw new Error('Сессия не найдена. Войди в аккаунт заново.');
-    headers.Authorization = 'Bearer ' + token;
-  }
-  const response = await fetch(IDZX_API_URL, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ action, ...payload })
-  });
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(result.error || 'Ошибка Supabase API: ' + response.status);
-  return result;
-}
-function mapCloudUser(u) {
-  return {
-    id: u.id,
-    name: u.first_name || '',
-    surname: u.last_name || '',
-    username: u.username,
-    balance: Number(u.balance || 0),
-    description: u.description || '',
-    avatar: u.avatar_path || '',
-    currency: u.currency || 'RUB',
-    lang: u.lang || 'ru',
-    flag: u.flag || '',
-    showBalance: !!u.show_balance,
-    isAdmin: !!u.is_admin,
-    inventory: {},
-    followers: [],
-    following: []
-  };
-}
-function saveUsers() {
-  // Облачные аккаунты нельзя сохранять локально целиком.
-}
-function saveListings() { localStorage.setItem('idzx_listings', JSON.stringify(listings)); }
-function saveNotifs() { localStorage.setItem('idzx_notifs', JSON.stringify(notifications)); }
-let currentUser = null;
-let models = [];
-let listings = readStorage('idzx_listings', []);
-if (!Array.isArray(listings)) listings = [];
-let notifications = readStorage('idzx_notifs', []);
-if (!Array.isArray(notifications)) notifications = [];
-let rates = { RUB:90, USD:1, EUR:0.92 };
-let currentTab = 'shop';
-let THREE, GLTFLoader, OrbitControls;
-let viewerRenderer = null;
-let viewerControls = null;
-let viewerAnimationId = 0;
-const miniRenderers = new Set();
+// ВСТАВЬ СЮДА СВОЙ PUBLISHABLE KEY
+const SUPABASE_KEY = "ВСТАВЬ_СВОЙ_PUBLISHABLE_KEY";
 
-function escapeHTML(value) {
-  return String(value ?? '').replace(/[&<>"']/g, ch => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  })[ch]);
-}
-function safeArray(value) { return Array.isArray(value) ? value : []; }
-function persistCurrentUser() {
-  // Изменение облачного профиля требует отдельного защищённого API-метода.
-  console.warn('Сохранение профиля пока не подключено к Edge Function.');
-}
-function closeViewer() {
-  document.getElementById('viewerModal').classList.remove('show');
-  if (viewerAnimationId) cancelAnimationFrame(viewerAnimationId);
-  viewerAnimationId = 0;
-  if (viewerControls) viewerControls.dispose();
-  viewerControls = null;
-  if (viewerRenderer) viewerRenderer.dispose();
-  viewerRenderer = null;
+const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+// ======================================
+// AUTHENTICATION
+// ======================================
+
+let authMode = "login";
+
+function openAuth(mode) {
+    authMode = mode;
+
+    document.getElementById("authModal").style.display = "flex";
+
+    document.getElementById("modalTitle").textContent =
+        mode === "login" ? "Вход в аккаунт" : "Создание аккаунта";
+
+    document.getElementById("registerFields").style.display =
+        mode === "register" ? "block" : "none";
+
+    document.getElementById("authMessage").textContent = "";
 }
 
-function t(k) { return (I18N[currentUser?.lang || 'ru'] || I18N.ru)[k] || k; }
-function saveUsers() { /* облачные аккаунты не записываем в localStorage */ }
-function saveListings() { localStorage.setItem('idzx_listings', JSON.stringify(listings)); }
-function saveNotifs() { localStorage.setItem('idzx_notifs', JSON.stringify(notifications)); }
-function changeUsernameReferences(oldName, newName) {
-  users.forEach(u => {
-    if (Array.isArray(u.followers)) u.followers = u.followers.map(x => x === oldName ? newName : x);
-    if (Array.isArray(u.following)) u.following = u.following.map(x => x === oldName ? newName : x);
-  });
-  listings.forEach(l => { if (l.seller === oldName) l.seller = newName; });
-  notifications = notifications.map(n => typeof n === 'string' ? n.replaceAll(oldName, newName) : n);
-  saveListings(); saveNotifs();
+function closeAuth() {
+    document.getElementById("authModal").style.display = "none";
 }
 
+async function submitAuth() {
 
-function openDB() {
-  return new Promise((res, rej) => {
-    const r = indexedDB.open('idzx3d', 1);
-    r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains('models')) r.result.createObjectStore('models', { keyPath:'id' }); };
-    r.onsuccess = () => res(r.result);
-    r.onerror = () => rej(r.error);
-  });
-}
-async function loadModels() {
-  const db = await openDB();
-  return new Promise(res => {
-    const tx = db.transaction('models','readonly');
-    const req = tx.objectStore('models').getAll();
-    req.onsuccess = () => {
-      models = (req.result || []).map(m => {
-        if (m.data && !(m.data instanceof ArrayBuffer)) {
-          // на всякий случай
-          m.data = m.data.buffer || m.data;
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    const message = document.getElementById("authMessage");
+
+    message.textContent = "Подождите...";
+
+    if (!email || !password) {
+        message.textContent = "Заполните все поля.";
+        return;
+    }
+
+    let result;
+
+    if (authMode === "register") {
+
+        const username =
+            document.getElementById("regUsername").value.trim();
+
+        if (!username) {
+            message.textContent = "Введите имя пользователя.";
+            return;
         }
-        return m;
-      });
-      res(models);
-    };
-  });
-}
-async function saveModel(m) {
-  const db = await openDB();
-  return new Promise(res => {
-    const tx = db.transaction('models','readwrite');
-    tx.objectStore('models').put(m);
-    tx.oncomplete = () => res();
-  });
-}
 
-async function fetchRates() {
-  try {
-    const r = await fetch('https://api.frankfurter.app/latest?from=USD&to=RUB,EUR');
-    const d = await r.json();
-    if (d.rates) { rates.RUB = d.rates.RUB || rates.RUB; rates.EUR = d.rates.EUR || rates.EUR; }
-  } catch(e) {}
-  updateBalance();
-}
-setInterval(fetchRates, 6 * 60 * 60 * 1000);
-fetchRates();
+        result = await db.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    username: username
+                }
+            }
+        });
 
-function convert(price) {
-  const cur = currentUser?.currency || 'RUB';
-  if (cur === 'RUB') return price;
-  const usd = price / rates.RUB;
-  return cur === 'USD' ? usd : usd * rates.EUR;
-}
-function formatPrice(p) {
-  const v = convert(p);
-  const cur = currentUser?.currency || 'RUB';
-  const s = cur === 'USD' ? '$' : cur === 'EUR' ? '€' : '₽';
-  return v.toFixed(cur === 'RUB' ? 0 : 2) + ' ' + s;
-}
-function updateBalance() {
-  if (currentUser) document.getElementById('balance').textContent = formatPrice(currentUser.balance);
-}
-function updateNotifBadge() {
-  const n = notifications.filter(x => !x.read).length;
-  const b = document.getElementById('notifBadge');
-  b.style.display = n ? 'flex' : 'none';
-  b.textContent = n > 9 ? '9+' : n;
-}
-function addNotif(text) {
-  notifications.unshift({ id:Date.now(), text, time:new Date().toLocaleString(), read:false });
-  if (notifications.length > 50) notifications.length = 50;
-  saveNotifs();
-  updateNotifBadge();
-}
-
-async function tryAutoLogin() {
-  const token = localStorage.getItem(IDZX_SESSION_KEY) || sessionStorage.getItem(IDZX_SESSION_KEY);
-  if (!token) return;
-  try {
-    const result = await cloudRequest('me', {}, true);
-    currentUser = mapCloudUser(result.user);
-    showApp();
-  } catch (error) {
-    localStorage.removeItem(IDZX_SESSION_KEY);
-    console.warn('Облачная сессия завершилась:', error.message);
-  }
-}
-function showApp() {
-  document.getElementById('authScreen').style.display = 'none';
-  document.getElementById('app').classList.add('visible');
-  updateApp();
-}
-function updateApp() {
-  if (!currentUser) return;
-  currentUser.inventory = currentUser.inventory || {};
-  currentUser.followers = safeArray(currentUser.followers);
-  currentUser.following = safeArray(currentUser.following);
-  updateBalance();
-  const av = document.getElementById('avatarBtn');
-  av.innerHTML = currentUser.avatar ? `<img src="${currentUser.avatar}">` : (currentUser.name||currentUser.username)[0].toUpperCase();
-  document.getElementById('uploadBtn').style.display = currentUser.isAdmin ? 'block' : 'none';
-  updateNotifBadge();
-  renderGrid();
-}
-
-function getVisible() {
-  const q = document.getElementById('search').value.toLowerCase();
-  if (currentTab === 'shop') return models.filter(m => (m.stock||0)>0 && (!q || String(m.name||'').toLowerCase().includes(q)));
-  if (currentTab === 'inventory') return models.filter(m => (currentUser.inventory?.[m.id]||0)>0 && (!q || String(m.name||'').toLowerCase().includes(q)));
-  if (currentTab === 'market') return listings.map(l => { const m = models.find(mm=>mm.id===l.modelId); return m ? {...m, listing:l} : null; }).filter(Boolean).filter(m => !q || m.name.toLowerCase().includes(q));
-  return [];
-}
-function renderGrid() {
-  const grid = document.getElementById('grid');
-  if (currentTab === 'following') { renderFollowing(); return; }
-  const items = getVisible();
-  if (!items.length) { grid.innerHTML = `<div class="empty">${t('empty')}</div>`; return; }
-  grid.innerHTML = '';
-  items.forEach(item => {
-    const color = RARITY_COLORS[item.rarity] || '#020617';
-    const price = item.listing ? item.listing.price : item.price;
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <canvas class="card-canvas" style="background:${color}"></canvas>
-      <div class="card-info">
-        <div class="card-title">${escapeHTML(item.name)}</div>
-        <div style="font-size:0.65rem;color:${color}">${RARITY_NAMES[item.rarity]||''}</div>
-        <div class="card-price">${formatPrice(price)}</div>
-      </div>`;
-    card.onclick = () => openViewer(item);
-    grid.appendChild(card);
-    setTimeout(() => initMini(card.querySelector('canvas'), item, color), 150);
-  });
-}
-async function renderFollowing() {
-  const q = document.getElementById('search').value.trim();
-  let list = [];
-  if (q) {
-    try {
-      const result = await cloudRequest('search_users', { query: q }, true);
-      cloudUsers = (result.users || []).map(mapCloudUser);
-      list = cloudUsers;
-    } catch (error) {
-      document.getElementById('grid').innerHTML = `<div class="empty">${escapeHTML(error.message)}</div>`;
-      return;
-    }
-  } else {
-    list = cloudUsers.filter(u => (currentUser.following||[]).includes(u.username));
-  }
-  const grid = document.getElementById('grid');
-  if (!list.length) { grid.innerHTML = `<div class="empty">${t('empty')}</div>`; return; }
-  grid.innerHTML = '';
-  list.forEach(u => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `<div style="padding:12px;text-align:center">
-      <div style="width:56px;height:56px;border-radius:50%;margin:0 auto 8px;background:linear-gradient(135deg,#22d3ee,#6366f1);overflow:hidden;display:grid;place-items:center;font-weight:700">
-        ${u.avatar ? `<img src="${escapeHTML(u.avatar)}" style="width:100%;height:100%;object-fit:cover">` : (u.name||u.username)[0].toUpperCase()}
-      </div>
-      <div>${escapeHTML(u.flag||'')} ${escapeHTML(u.name||'')} ${escapeHTML(u.surname||'')}</div>
-      <div style="color:var(--muted);font-size:0.8rem">@${escapeHTML(u.username)}</div>
-    </div>`;
-    card.onclick = () => openUserProfile(u);
-    grid.appendChild(card);
-  });
-}
-
-async function loadThree() {
-  if (THREE) return;
-  try {
-    // esm.sh bundles/re-writes the "three" imports used by Three.js examples.
-    const base = 'https://esm.sh/three@0.160.0';
-    const [threeModule, gltfModule, controlsModule] = await Promise.all([
-      import(base),
-      import(base + '/examples/jsm/loaders/GLTFLoader.js'),
-      import(base + '/examples/jsm/controls/OrbitControls.js')
-    ]);
-    THREE = threeModule;
-    GLTFLoader = gltfModule.GLTFLoader;
-    OrbitControls = controlsModule.OrbitControls;
-  } catch (e) {
-    console.error('Three.js load failed', e);
-    throw new Error('Не удалось загрузить библиотеку 3D. Проверь интернет-соединение.');
-  }
-}
-async function initMini(canvas, item, bg) {
-  if (!item || !item.data) {
-    canvas.style.background = bg;
-    return;
-  }
-  // Принудительно задаём размер canvas
-  canvas.width = canvas.clientWidth || 100;
-  canvas.height = 90;
-  canvas.style.background = bg;
-
-  try {
-    await loadThree();
-    const scene = new THREE.Scene();
-    const cam = new THREE.PerspectiveCamera(45, canvas.width / canvas.height, 0.1, 100);
-    cam.position.set(0, 0, 2.2);
-    const ren = new THREE.WebGLRenderer({ canvas, antialias: true });
-    ren.setSize(canvas.width, canvas.height);
-    ren.setPixelRatio(1);
-    ren.setClearColor(new THREE.Color(bg));
-    ren.outputColorSpace = THREE.SRGBColorSpace;
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const light = new THREE.DirectionalLight(0xffffff, 1.2);
-    light.position.set(1, 2, 2);
-    scene.add(light);
-
-    const loader = new GLTFLoader();
-    loader.parse(item.data, '', (gltf) => {
-      const model = gltf.scene;
-      const box = new THREE.Box3().setFromObject(model);
-      const size = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
-      model.position.sub(center);
-      const maxDim = Math.max(size.x, size.y, size.z) || 1;
-      model.scale.setScalar(1.1 / maxDim);
-      scene.add(model);
-
-      let frame = 0;
-      function animate() {
-        frame++;
-        if (frame > 5000) return; // не крутить бесконечно если карточка удалена
-        requestAnimationFrame(animate);
-        model.rotation.y += 0.02;
-        ren.render(scene, cam);
-      }
-      animate();
-    }, (err) => {
-      console.warn('Parse failed', err);
-      showMiniError(canvas, 'Ошибка файла');
-    });
-  } catch (e) {
-    console.warn(e);
-    showMiniError(canvas, 'Нет 3D');
-  }
-}
-function showMiniError(canvas, text) {
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-  canvas.width = canvas.clientWidth || 100;
-  canvas.height = 90;
-  ctx.fillStyle = '#1e293b';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#f87171';
-  ctx.font = '12px system-ui';
-  ctx.textAlign = 'center';
-  ctx.fillText(text, canvas.width / 2, 50);
-}
-
-function openViewer(item) {
-  document.getElementById('viewerTitle').textContent = item.name;
-  const color = RARITY_COLORS[item.rarity] || '#020617';
-  const price = item.listing ? item.listing.price : item.price;
-  document.getElementById('viewerInfo').innerHTML = `
-    <p>Цена: <strong>${formatPrice(price)}</strong></p>
-    <p>Редкость: <strong style="color:${color}">${RARITY_NAMES[item.rarity]}</strong></p>
-    <p>У тебя: <strong>${currentUser.inventory[item.id]||0}</strong></p>`;
-  const acts = document.getElementById('viewerActions');
-  acts.innerHTML = '';
-  if (currentTab === 'shop' && (item.stock||0)>0) {
-    const b = document.createElement('button'); b.className='btn'; b.textContent=t('buy');
-    b.onclick = () => buyShop(item); acts.appendChild(b);
-  }
-  if (currentTab === 'inventory' && (currentUser.inventory[item.id]||0)>0) {
-    const inp = document.createElement('input'); inp.type='number'; inp.value=item.price||100; inp.style.cssText='width:100%;padding:10px;margin:8px 0;background:rgba(255,255,255,0.08);border:1px solid var(--border);border-radius:10px;color:#fff';
-    acts.appendChild(inp);
-    const s = document.createElement('button'); s.className='btn'; s.textContent=t('sell');
-    s.onclick = () => sellItem(item, +inp.value); acts.appendChild(s);
-  }
-  if (currentTab === 'market' && item.listing) {
-    if (item.listing.seller !== currentUser.username) {
-      const b = document.createElement('button'); b.className='btn'; b.textContent=t('buy');
-      b.onclick = () => buyListing(item.listing); acts.appendChild(b);
     } else {
-      const inp = document.createElement('input'); inp.type='number'; inp.value=item.listing.price; inp.style.cssText='width:100%;padding:10px;margin:8px 0;background:rgba(255,255,255,0.08);border:1px solid var(--border);border-radius:10px;color:#fff';
-      acts.appendChild(inp);
-      const ch = document.createElement('button'); ch.className='btn'; ch.textContent='Изменить цену';
-      ch.onclick = () => { item.listing.price=+inp.value; saveListings(); updateApp(); closeViewer(); }; acts.appendChild(ch);
-      const cn = document.createElement('button'); cn.className='btn'; cn.style.background='#ef4444'; cn.style.color='#fff'; cn.textContent='Отменить';
-      cn.onclick = () => cancelListing(item.listing); acts.appendChild(cn);
+
+        result = await db.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
     }
-  }
-  document.getElementById('viewerModal').classList.add('show');
-  loadViewer(item, color);
-}
-function closeViewer() { document.getElementById('viewerModal').classList.remove('show'); }
-async function loadViewer(item, color) {
-  try {
-    await loadThree();
-    const canvas = document.getElementById('viewerCanvas');
-    canvas.style.background = color;
-    const scene = new THREE.Scene();
-    const cam = new THREE.PerspectiveCamera(45, canvas.clientWidth / 220 || 1.5, 0.1, 100);
-    cam.position.set(0, 0, 3);
-    if (viewerRenderer) viewerRenderer.dispose();
-    if (viewerControls) viewerControls.dispose();
-    const ren = new THREE.WebGLRenderer({ canvas, antialias: true });
-    viewerRenderer = ren;
-    ren.setSize(canvas.clientWidth || 360, 220);
-    ren.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    ren.setClearColor(new THREE.Color(color));
-    ren.outputColorSpace = THREE.SRGBColorSpace;
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 0.8));
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.5);
-    keyLight.position.set(2, 3, 2);
-    scene.add(keyLight);
-    const ctrl = new OrbitControls(cam, canvas);
-    viewerControls = ctrl;
-    ctrl.enableDamping = true;
-    if (item.data) {
-      new GLTFLoader().parse(item.data, '', gltf => {
-        const model = gltf.scene;
-        const box = new THREE.Box3().setFromObject(model);
-        const size = box.getSize(new THREE.Vector3());
-        const center = box.getCenter(new THREE.Vector3());
-        model.position.sub(center);
-        const maxDim = Math.max(size.x, size.y, size.z) || 1;
-        model.scale.setScalar(1.5 / maxDim);
-        scene.add(model);
-        function animate() {
-          if (!document.getElementById('viewerModal').classList.contains('show')) return;
-          viewerAnimationId = requestAnimationFrame(animate);
-          ctrl.update();
-          model.rotation.y += 0.01;
-          ren.render(scene, cam);
-        }
-        animate();
-      }, err => {
-        console.warn('Viewer GLTF error', err);
-        document.getElementById('viewerInfo').innerHTML += '<p style="color:#f87171;margin-top:8px">Не удалось загрузить 3D-модель</p>';
-      });
+
+    if (result.error) {
+        message.textContent = result.error.message;
+        return;
     }
-  } catch (e) {
-    console.warn(e);
-    document.getElementById('viewerInfo').innerHTML += '<p style="color:#f87171;margin-top:8px">3D-просмотр недоступен. Проверь интернет и формат файла.</p>';
-  }
+
+    if (authMode === "register" && !result.data.session) {
+        message.textContent =
+            "Регистрация прошла. Проверьте почту для подтверждения.";
+        return;
+    }
+
+    closeAuth();
+    await loadUser();
+
 }
 
-function buyShop(item) {
-  if (currentUser.balance < item.price) return alert(t('notEnough'));
-  if ((item.stock||0)<=0) return;
-  currentUser.balance -= item.price;
-  currentUser.inventory[item.id] = (currentUser.inventory[item.id]||0)+1;
-  item.stock--;
-  users[users.findIndex(u=>u.username===currentUser.username)] = currentUser;
-  saveUsers(); saveModel(item);
-  models[models.findIndex(m=>m.id===item.id)] = item;
-  updateApp(); closeViewer();
-}
-function sellItem(item, price) {
-  if (!price || price<=0) return alert(t('setPrice'));
-  if ((currentUser.inventory[item.id]||0)<=0) return;
-  currentUser.inventory[item.id]--;
-  if (currentUser.inventory[item.id]<=0) delete currentUser.inventory[item.id];
-  let ex = listings.find(l => l.modelId===item.id && l.seller===currentUser.username);
-  if (ex) { ex.qty=(ex.qty||1)+1; ex.price=price; } else listings.push({ modelId:item.id, seller:currentUser.username, price, qty:1 });
-  users[users.findIndex(u=>u.username===currentUser.username)] = currentUser;
-  saveUsers(); saveListings();
-  addNotif(`${currentUser.username} выставил ${escapeHTML(item.name)}`);
-  updateApp(); closeViewer();
-}
-function buyListing(l) {
-  if (currentUser.balance < l.price) return alert(t('notEnough'));
-  currentUser.balance -= l.price;
-  currentUser.inventory[l.modelId] = (currentUser.inventory[l.modelId]||0)+1;
-  l.qty = (l.qty||1)-1;
-  const seller = users.find(u=>u.username===l.seller);
-  if (seller) seller.balance += l.price;
-  if (l.qty<=0) listings = listings.filter(x=>x!==l);
-  users[users.findIndex(u=>u.username===currentUser.username)] = currentUser;
-  saveUsers(); saveListings();
-  updateApp(); closeViewer();
-}
-function cancelListing(l) {
-  currentUser.inventory[l.modelId] = (currentUser.inventory[l.modelId]||0) + (l.qty||1);
-  listings = listings.filter(x=>x!==l);
-  users[users.findIndex(u=>u.username===currentUser.username)] = currentUser;
-  saveUsers(); saveListings();
-  updateApp(); closeViewer();
+// ======================================
+// USER PROFILE
+// ======================================
+
+async function loadUser() {
+
+    const { data: authData } = await db.auth.getUser();
+
+    const user = authData.user;
+
+    if (!user) {
+        showLoggedOut();
+        return;
+    }
+
+    const { data: profile, error } = await db
+        .from("profiles")
+        .select("username, first_name, last_name, balance, is_admin")
+        .eq("id", user.id)
+        .maybeSingle();
+
+    if (error) {
+        console.error(error);
+        document.getElementById("status").textContent =
+            "Не удалось загрузить профиль.";
+        return;
+    }
+
+    if (!profile) {
+        document.getElementById("status").textContent =
+            "Аккаунт создан. Профиль ещё не создан в базе данных.";
+    }
+
+    document.getElementById("authButtons").style.display = "none";
+    document.getElementById("loggedButtons").style.display = "block";
+    document.getElementById("userPanel").style.display = "block";
+
+    document.getElementById("username").textContent =
+        profile?.username || user.email;
+
+    document.getElementById("userEmail").textContent =
+        user.email;
+
+    document.getElementById("userBalance").textContent =
+        profile
+            ? "Баланс: " + profile.balance
+            : "Баланс: не загружен";
+
 }
 
-function openUserProfile(user) {
-  const followers = (user.followers||[]).length;
-  const following = (user.following||[]).length;
-  const isF = (currentUser.following||[]).includes(user.username);
-  const bal = user.showBalance ? formatPrice(user.balance) : '••••••';
-  document.getElementById('viewerTitle').textContent = (user.flag||'')+' '+(user.name||'')+' '+(user.surname||'');
-  document.getElementById('viewerInfo').innerHTML = `
-    <div style="text-align:center">
-      <div style="width:64px;height:64px;border-radius:50%;margin:0 auto 8px;background:linear-gradient(135deg,#22d3ee,#6366f1);overflow:hidden;display:grid;place-items:center;font-size:1.4rem">
-        ${user.avatar ? `<img src="${escapeHTML(user.avatar)}" style="width:100%;height:100%;object-fit:cover">` : (user.name||user.username)[0].toUpperCase()}
-      </div>
-      <div>@${escapeHTML(user.username)}</div>
-      <div style="color:var(--muted);font-size:0.85rem;margin:6px 0">${escapeHTML(user.description||'')}</div>
-      <div>${bal}</div>
-      <div style="margin:8px 0"><strong>${followers}</strong> подписчиков · <strong>${following}</strong> подписок</div>
-    </div>`;
-  const acts = document.getElementById('viewerActions');
-  acts.innerHTML = '';
-  if (user.username !== currentUser.username) {
-    const b = document.createElement('button'); b.className='btn'; b.textContent = isF ? 'Отписаться' : 'Подписаться';
-    b.onclick = () => toggleFollow(user.username); acts.appendChild(b);
-  }
-  document.getElementById('viewerModal').classList.add('show');
-}
-function toggleFollow(un) {
-  if (!currentUser.following) currentUser.following = [];
-  const t = users.find(u=>u.username===un);
-  if (!t) return;
-  if (!t.followers) t.followers = [];
-  const i = currentUser.following.indexOf(un);
-  if (i>=0) { currentUser.following.splice(i,1); const fi=t.followers.indexOf(currentUser.username); if(fi>=0) t.followers.splice(fi,1); }
-  else { currentUser.following.push(un); t.followers.push(currentUser.username); }
-  users[users.findIndex(u=>u.username===currentUser.username)] = currentUser;
-  saveUsers();
-  openUserProfile(t);
+function showLoggedOut() {
+    document.getElementById("authButtons").style.display = "block";
+    document.getElementById("loggedButtons").style.display = "none";
+    document.getElementById("userPanel").style.display = "none";
 }
 
-// Events
-document.getElementById('loginTab').onclick = () => { document.getElementById('loginTab').classList.add('active'); document.getElementById('regTab').classList.remove('active'); document.getElementById('loginForm').style.display='block'; document.getElementById('regForm').style.display='none'; };
-document.getElementById('regTab').onclick = () => { document.getElementById('regTab').classList.add('active'); document.getElementById('loginTab').classList.remove('active'); document.getElementById('regForm').style.display='block'; document.getElementById('loginForm').style.display='none'; };
-document.getElementById('doReg').onclick = async () => {
-  const name=document.getElementById('regName').value.trim();
-  const surname=document.getElementById('regSurname').value.trim();
-  const username=document.getElementById('regUser').value.trim();
-  const pass=document.getElementById('regPass').value;
-  const out=document.getElementById('regError');
-  out.textContent='';
-  if (!name||!surname||!username||!pass) return out.textContent='Заполни все поля';
-  if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) return out.textContent='Username: 3–20 символов, только латиница, цифры и _';
-  if (pass.length < 8) return out.textContent='Пароль должен содержать минимум 8 символов';
-  try {
-    const result = await cloudRequest('register', {
-      first_name:name, last_name:surname, username, password:pass
+async function logout() {
+    const { error } = await db.auth.signOut();
+
+    if (error) {
+        alert(error.message);
+        return;
+    }
+
+    showLoggedOut();
+}
+
+// ======================================
+// MARKET
+// ======================================
+
+async function loadProducts() {
+
+    const container = document.getElementById("products");
+
+    const { data, error } = await db
+        .from("models")
+        .select("id, name, price, stock, rarity")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        container.innerHTML =
+            "<p class='muted'>Не удалось загрузить товары. Проверьте SQL и RLS в Supabase.</p>";
+        console.error(error);
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        container.innerHTML =
+            "<p class='muted'>Пока товаров нет.</p>";
+        return;
+    }
+
+    container.innerHTML = "";
+
+    data.forEach(item => {
+
+        const card = document.createElement("div");
+        card.className = "product";
+
+        const preview = document.createElement("div");
+        preview.className = "product-preview";
+        preview.textContent = "◆";
+
+        const name = document.createElement("h3");
+        name.textContent = item.name;
+
+        const rarity = document.createElement("p");
+        rarity.textContent = "Редкость: " + (item.rarity || "Обычная");
+
+        const price = document.createElement("div");
+        price.className = "price";
+        price.textContent = "Цена: " + item.price;
+
+        const stock = document.createElement("p");
+        stock.textContent = "В наличии: " + item.stock;
+
+        card.append(preview, name, rarity, price, stock);
+        container.appendChild(card);
+
     });
-    localStorage.setItem(IDZX_SESSION_KEY, result.token);
-    currentUser = mapCloudUser(result.user);
-    out.textContent='';
-    showApp();
-  } catch (error) {
-    out.textContent=error.message;
-  }
-};
-document.getElementById('doLogin').onclick = async () => {
-  const username=document.getElementById('loginUser').value.trim();
-  const pass=document.getElementById('loginPass').value;
-  const out=document.getElementById('loginError');
-  out.textContent='';
-  if (!username || !pass) return out.textContent='Введи Username и пароль';
-  try {
-    const result = await cloudRequest('login', { username, password:pass });
-    localStorage.setItem(IDZX_SESSION_KEY, result.token);
-    currentUser = mapCloudUser(result.user);
-    if (document.getElementById('rememberMe').checked) {
-      // Токен хранится для восстановления сессии; пароль не сохраняется.
-    } else {
-      // Без «Запомнить» токен всё равно нужен на время текущей вкладки.
-      sessionStorage.setItem(IDZX_SESSION_KEY, result.token);
-      localStorage.removeItem(IDZX_SESSION_KEY);
-    }
-    showApp();
-  } catch (error) {
-    out.textContent=error.message;
-  }
-};
-document.getElementById('resetData').onclick = () => { if (confirm('Удалить все данные?')) { localStorage.clear(); indexedDB.deleteDatabase('idzx3d'); location.reload(); } };
 
-document.querySelectorAll('.nav-btn').forEach(b => b.onclick = () => {
-  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  currentTab = b.dataset.tab;
-  renderGrid();
-});
-document.getElementById('search').oninput = renderGrid;
+}
 
-document.getElementById('avatarBtn').onclick = () => {
-  document.getElementById('nameInput').value = currentUser.name||'';
-  document.getElementById('surnameInput').value = currentUser.surname||'';
-  document.getElementById('usernameInput').value = currentUser.username;
-  document.getElementById('usernameInput').readOnly = !currentUser.isAdmin;
-  document.getElementById('usernameHint').textContent = currentUser.isAdmin
-    ? 'Только администратор может менять свой username.' : 'Username нельзя изменить.';
-  document.getElementById('currentPass').value = '';
-  document.getElementById('newPass').value = '';
-  document.getElementById('confirmPass').value = '';
-  document.getElementById('securityError').textContent = '';
-  document.getElementById('descInput').value = currentUser.description||'';
-  document.getElementById('currencySelect').value = currentUser.currency||'RUB';
-  document.getElementById('langSelect').value = currentUser.lang||'ru';
-  document.getElementById('flagSelect').value = currentUser.flag||'';
-  document.getElementById('showBalanceCheck').checked = !!currentUser.showBalance;
-  document.getElementById('profileModal').classList.add('show');
-};
-document.getElementById('saveProfile').onclick = () => {
-  const oldUsername = currentUser.username;
-  const requestedUsername = document.getElementById('usernameInput').value.trim();
-  if (currentUser.isAdmin) {
-    if (!/^[a-zA-Z0-9_]{3,20}$/.test(requestedUsername)) {
-      alert('Username: 3–20 символов, только латиница, цифры и _'); return;
-    }
-    const taken = users.some(u => u !== currentUser && u.username.toLowerCase() === requestedUsername.toLowerCase());
-    if (taken) { alert('Этот username уже занят'); return; }
-    currentUser.username = requestedUsername;
-    if (oldUsername !== requestedUsername) changeUsernameReferences(oldUsername, requestedUsername);
-  }
-  currentUser.name = currentUser.isAdmin ? 'Админ' : document.getElementById('nameInput').value;
-  currentUser.surname = currentUser.isAdmin ? 'Админ' : document.getElementById('surnameInput').value;
-  currentUser.description = document.getElementById('descInput').value;
-  currentUser.currency = document.getElementById('currencySelect').value;
-  currentUser.lang = document.getElementById('langSelect').value;
-  currentUser.flag = document.getElementById('flagSelect').value;
-  currentUser.showBalance = document.getElementById('showBalanceCheck').checked;
-  const f = document.getElementById('avatarFile').files[0];
-  if (f) {
-    const r = new FileReader();
-    r.onload = () => { currentUser.avatar = r.result; finishSave(); };
-    r.readAsDataURL(f);
-  } else finishSave();
-  function finishSave() {
-    users[users.findIndex(u=>u.username===currentUser.username)] = currentUser;
-    saveUsers();
-    document.getElementById('profileModal').classList.remove('show');
-    document.getElementById('avatarFile').value = '';
-    updateApp();
-  }
-};
-document.getElementById('changePassBtn').onclick = () => {
-  const out = document.getElementById('securityError');
-  out.textContent = 'Смена пароля через сервер пока не реализована. Пароль в браузере не меняется.';
-};
+// ======================================
+// START
+// ======================================
 
-document.getElementById('logoutBtn').onclick = () => {
-  currentUser = null; localStorage.removeItem(IDZX_SESSION_KEY); sessionStorage.removeItem(IDZX_SESSION_KEY);
-  closeViewer();
-  document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
-  document.getElementById('app').classList.remove('visible');
-  document.getElementById('authScreen').style.display = 'grid';
-  document.getElementById('profileModal').classList.remove('show');
-};
+async function startApp() {
 
-document.getElementById('uploadBtn').onclick = () => document.getElementById('uploadModal').classList.add('show');
-document.getElementById('doUpload').onclick = async () => {
-  const file = document.getElementById('modelFile').files[0];
-  const name = document.getElementById('modelName').value.trim();
-  const price = +document.getElementById('modelPrice').value || 0;
-  const qty = Math.max(1, +document.getElementById('modelQty').value || 1);
-  const rarity = document.getElementById('modelRarity').value;
-  if (!file || !name) return alert('Файл и название обязательны');
-  const ext = file.name.toLowerCase();
-  if (!ext.endsWith('.glb')) {
-    return alert('Загружай .glb. Одиночный .gltf часто зависит от внешних файлов текстур и геометрии.');
-  }
-  if (file.size > 50 * 1024 * 1024) return alert('Файл слишком большой (макс. 50 МБ)');
-  try {
-    const data = await file.arrayBuffer();
-    if (!data || data.byteLength < 100) throw new Error('Файл пустой или повреждён');
-    const model = { id:'m'+Date.now(), name, price, stock:qty, rarity, data };
-    await saveModel(model);
-    models.push(model);
-    addNotif('Новая модель в магазине: '+name);
-    document.getElementById('uploadModal').classList.remove('show');
-    document.getElementById('modelFile').value = '';
-    document.getElementById('modelName').value = '';
-    document.getElementById('uploadModal').querySelector('h2').textContent = 'Загрузить модель';
-    updateApp();
-  } catch(e) { alert('Ошибка загрузки: ' + (e.message || e)); }
-};
+    await loadUser();
+    await loadProducts();
 
-document.getElementById('notifBtn').onclick = () => {
-  const list = document.getElementById('notifList');
-  list.innerHTML = notifications.length ? notifications.map(n=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)">${escapeHTML(n.text)}<div style="font-size:0.75rem;color:var(--muted)">${escapeHTML(n.time)}</div></div>`).join('') : '<div style="color:var(--muted);text-align:center">Пусто</div>';
-  notifications.forEach(n=>n.read=true); saveNotifs(); updateNotifBadge();
-  document.getElementById('notifModal').classList.add('show');
-};
-document.getElementById('clearNotif').onclick = () => { notifications=[]; saveNotifs(); document.getElementById('notifList').innerHTML=''; updateNotifBadge(); };
+}
 
-document.querySelectorAll('.modal').forEach(m => m.onclick = e => {
-  if (e.target === m) {
-    if (m.id === 'viewerModal') closeViewer();
-    else m.classList.remove('show');
-  }
-});
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.modal.show').forEach(m => {
-      if (m.id === 'viewerModal') closeViewer();
-      else m.classList.remove('show');
-    });
-  }
+db.auth.onAuthStateChange(() => {
+    setTimeout(loadUser, 0);
 });
 
-(async () => {
-  try {
-    await loadModels();
-    await tryAutoLogin();
-  } catch (error) {
-    console.error(error);
-    alert('Не удалось открыть локальную базу данных. Открой сайт в современном браузере и разреши IndexedDB.');
-  }
-})();
+startApp();
+
 </script>
+
 </body>
 </html>
