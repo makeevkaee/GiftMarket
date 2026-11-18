@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0b12">
+  <title>Roblox User Finder</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; padding: 32px 18px;
+      display: grid; place-items: center;
+      color: #f5f3ff; font-family: Inter, system-ui, Arial, sans-serif;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(124,58,237,.22), transparent 48%),
+        #0b0b12;
+    }
+    .app { width: min(100%, 560px); }
+    .brand { text-align: center; margin-bottom: 28px; }
+    .logo {
+      width: 58px; height: 58px; margin: 0 auto 16px; display: grid;
+      place-items: center; border-radius: 18px; font-size: 27px;
+      background: linear-gradient(135deg, #8b5cf6, #5b21b6);
+      box-shadow: 0 12px 40px rgba(124,58,237,.3);
+    }
+    h1 { margin: 0; font-size: clamp(28px, 6vw, 38px); letter-spacing: -1.4px; }
+    .subtitle { color: #9995aa; margin: 9px 0 0; font-size: 14px; }
+    .panel {
+      padding: 24px; border: 1px solid #292638; border-radius: 22px;
+      background: rgba(20,18,30,.92); box-shadow: 0 24px 80px rgba(0,0,0,.35);
+    }
+    label { display: block; margin-bottom: 10px; color: #c9c5d8; font-size: 13px; font-weight: 650; }
+    .search { display: flex; gap: 10px; }
+    input {
+      min-width: 0; flex: 1; padding: 15px 16px; border-radius: 12px;
+      border: 1px solid #383348; outline: none; color: white;
+      background: #100e18; font-size: 15px; transition: border .2s;
+    }
+    input:focus { border-color: #9b75ff; }
+    input::placeholder { color: #686477; }
+    button {
+      border: 0; border-radius: 12px; padding: 0 19px; cursor: pointer;
+      color: white; font-weight: 700; font-size: 14px;
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      transition: transform .15s, opacity .15s;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: .55; cursor: wait; transform: none; }
+    .status { min-height: 22px; margin: 14px 2px 0; color: #aaa5b9; font-size: 13px; }
+    .error { color: #fb7185; }
+    .result {
+      display: none; margin-top: 20px; padding: 20px;
+      border: 1px solid #302a42; border-radius: 18px;
+      background: linear-gradient(145deg, #1b1728, #12101a);
+      animation: appear .25s ease;
+    }
+    .profile { display: flex; align-items: center; gap: 18px; }
+    .avatar-wrap {
+      width: 116px; height: 116px; flex: 0 0 116px; overflow: hidden;
+      border-radius: 18px; background: #252033; border: 1px solid #41375a;
+    }
+    .avatar-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .details { min-width: 0; }
+    .display-name { margin: 0 0 5px; font-size: 21px; overflow-wrap: anywhere; }
+    .username { color: #a99bbf; font-size: 14px; overflow-wrap: anywhere; }
+    .verified { color: #a78bfa; font-size: 12px; margin-top: 9px; }
+    .meta {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      margin-top: 18px; padding-top: 16px; border-top: 1px solid #302a42;
+    }
+    .meta-item { min-width: 0; }
+    .meta-label { color: #8e899e; font-size: 11px; margin-bottom: 5px; }
+    .meta-value { color: #e8e3f4; font-size: 13px; font-weight: 650; overflow-wrap: anywhere; }
+    .profile-link {
+      display: block; margin-top: 17px; padding: 12px; text-align: center;
+      border-radius: 11px; color: #e9ddff; text-decoration: none;
+      background: rgba(139,92,246,.15); border: 1px solid rgba(167,139,250,.25);
+      font-size: 13px; font-weight: 650;
+    }
+    .profile-link:hover { background: rgba(139,92,246,.25); }
+    .footer { text-align: center; color: #666174; font-size: 11px; margin-top: 20px; }
+    @keyframes appear { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 440px) {
+      .panel { padding: 18px; }
+      .search { flex-direction: column; }
+      button { min-height: 48px; }
+      .profile { align-items: flex-start; gap: 13px; }
+      .avatar-wrap { width: 94px; height: 94px; flex-basis: 94px; }
+      .display-name { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="brand">
+      <div class="logo" aria-hidden="true">R</div>
+      <h1>Roblox User Finder</h1>
+      <p class="subtitle">Найди профиль Roblox по имени пользователя</p>
+    </header>
+
+    <section class="panel">
+      <form id="searchForm">
+        <label for="username">ROBLOX USERNAME</label>
+        <div class="search">
+          <input id="username" name="username" placeholder="Например: Builderman"
+                 autocomplete="off" maxlength="20" required>
+          <button id="searchButton" type="submit">Найти</button>
+        </div>
+      </form>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+
+      <article id="result" class="result">
+        <div class="profile">
+          <div class="avatar-wrap">
+            <img id="avatar" alt="Аватар пользователя Roblox">
+          </div>
+          <div class="details">
+            <h2 id="displayName" class="display-name"></h2>
+            <div id="handle" class="username"></div>
+            <div class="verified">● Профиль Roblox найден</div>
+          </div>
+        </div>
+        <div class="meta">
+          <div class="meta-item">
+            <div class="meta-label">USER ID</div>
+            <div id="userId" class="meta-value"></div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">USERNAME</div>
+            <div id="usernameValue" class="meta-value"></div>
+          </div>
+        </div>
+        <a id="profileLink" class="profile-link" target="_blank" rel="noopener noreferrer">
+          Открыть профиль Roblox ↗
+        </a>
+      </article>
+    </section>
+    <footer class="footer">Данные и аватары загружаются из публичного Roblox API</footer>
+  </main>
+
+  <script>
+    const form = document.getElementById('searchForm');
+    const input = document.getElementById('username');
+    const button = document.getElementById('searchButton');
+    const statusBox = document.getElementById('status');
+    const result = document.getElementById('result');
+
+    function setStatus(message, isError = false) {
+      statusBox.textContent = message;
+      statusBox.className = isError ? 'status error' : 'status';
+    }
+
+    async function searchUser(username) {
+      const response = await fetch('https://users.roblox.com/v1/usernames/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          usernames: [username],
+          excludeBannedUsers: false
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(response.status === 429
+          ? 'Слишком много запросов. Подожди немного и попробуй снова.'
+          : `Roblox API вернул ошибку (${response.status}). Попробуй позже.`);
+      }
+
+      const data = await response.json();
+      return data.data && data.data.length ? data.data[0] : null;
+    }
+
+    async function getAvatar(userId) {
+      const url = new URL('https://thumbnails.roblox.com/v1/users/avatar');
+      url.search = new URLSearchParams({
+        userIds: String(userId),
+        size: '420x420',
+        format: 'Png',
+        isCircular: 'false'
+      }).toString();
+
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Не удалось загрузить аватар. Попробуй ещё раз.');
+      const data = await response.json();
+      const item = data.data && data.data[0];
+      if (!item || item.state !== 'Completed' || !item.imageUrl) {
+        throw new Error('Аватар пока недоступен. Попробуй позже.');
+      }
+      return item.imageUrl;
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const username = input.value.trim();
+
+      if (!username) {
+        setStatus('Введи Username пользователя.', true);
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = 'Поиск...';
+      result.style.display = 'none';
+      setStatus('Ищем пользователя в Roblox...');
+
+      try {
+        const user = await searchUser(username);
+
+        if (!user) {
+          setStatus('Пользователь с таким Username не найден.', true);
+          return;
+        }
+
+        setStatus('Загружаем аватар...');
+        const avatarUrl = await getAvatar(user.id);
+
+        document.getElementById('avatar').src = avatarUrl;
+        document.getElementById('displayName').textContent = user.displayName || user.name;
+        document.getElementById('handle').textContent = '@' + user.name;
+        document.getElementById('userId').textContent = user.id;
+        document.getElementById('usernameValue').textContent = user.name;
+        document.getElementById('profileLink').href = `https://www.roblox.com/users/${user.id}/profile`;
+
+        result.style.display = 'block';
+        setStatus('Пользователь успешно найден.');
+      } catch (error) {
+        console.error(error);
+        setStatus(
+          error instanceof TypeError
+            ? 'Не удалось связаться с Roblox. Проверь интернет или ограничения браузера (CORS).'
+            : error.message,
+          true
+        );
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Найти';
+      }
+    });
+  </script>
+</body>
+</html>
