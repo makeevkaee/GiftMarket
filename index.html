@@ -30,6 +30,7 @@
       background: rgba(20,18,30,.92); box-shadow: 0 24px 80px rgba(0,0,0,.35);
     }
     label { display: block; margin-bottom: 10px; color: #c9c5d8; font-size: 13px; font-weight: 650; }
+    .search-area { position: relative; }
     .search { display: flex; gap: 10px; }
     input {
       min-width: 0; flex: 1; padding: 15px 16px; border-radius: 12px;
@@ -48,6 +49,63 @@
     button:disabled { opacity: .55; cursor: wait; transform: none; }
     .status { min-height: 22px; margin: 14px 2px 0; color: #aaa5b9; font-size: 13px; }
     .error { color: #fb7185; }
+
+    .toolbar { display: flex; gap: 9px; margin-top: 11px; }
+    .toolbar-button {
+      min-height: 38px; padding: 0 13px; border: 1px solid #3a334c;
+      background: #171421; color: #d8cafa; font-size: 12px; font-weight: 650;
+    }
+    .toolbar-button:hover { background: #211b30; }
+    .saved-count { display: inline-block; margin-left: 4px; color: #a78bfa; }
+
+    .suggestions {
+      display: none; position: absolute; z-index: 20; top: calc(100% + 8px);
+      left: 0; right: 0; max-height: 270px; overflow-y: auto;
+      padding: 6px; border: 1px solid #39324b; border-radius: 13px;
+      background: #171421; box-shadow: 0 16px 38px rgba(0,0,0,.42);
+    }
+    .suggestion-item {
+      width: 100%; display: flex; align-items: center; gap: 11px;
+      padding: 10px; text-align: left; border-radius: 9px;
+      color: #f0ebfa; background: transparent; font-size: 13px;
+    }
+    .suggestion-item:hover { background: #282137; transform: none; }
+    .suggestion-avatar {
+      width: 34px; height: 34px; flex: 0 0 34px; display: grid;
+      place-items: center; border-radius: 10px; color: #d8cafa;
+      background: linear-gradient(135deg, #49356b, #282039); font-weight: 750;
+    }
+    .suggestion-names { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .suggestion-display { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .suggestion-username { color: #9188a5; font-size: 11px; }
+    .suggestion-note { padding: 10px; color: #9d96ad; font-size: 12px; }
+
+    .saved-panel {
+      display: none; margin-top: 12px; padding: 13px;
+      border: 1px solid #302a42; border-radius: 14px; background: #15121f;
+    }
+    .saved-heading { margin: 0 0 9px; color: #cfc5e6; font-size: 12px; font-weight: 700; }
+    .saved-list { display: flex; flex-direction: column; gap: 6px; }
+    .saved-user {
+      width: 100%; display: flex; align-items: center; gap: 10px;
+      padding: 8px; border: 1px solid transparent; border-radius: 10px;
+      text-align: left; background: #1c1828; color: #eee9f8;
+    }
+    .saved-user:hover { border-color: #51416f; background: #241d33; transform: none; }
+    .saved-avatar {
+      width: 38px; height: 38px; flex: 0 0 38px; object-fit: contain;
+      border-radius: 9px; background: #302741;
+    }
+    .saved-user-info { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 3px; }
+    .saved-display { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 650; }
+    .saved-username { color: #958ba7; font-size: 11px; }
+    .remove-saved {
+      width: 30px; height: 30px; padding: 0; border-radius: 8px;
+      background: transparent; color: #9e94af; font-size: 17px;
+    }
+    .remove-saved:hover { color: #fb7185; background: rgba(251,113,133,.1); transform: none; }
+    .empty-saved { padding: 8px 2px; color: #91899f; font-size: 12px; }
+
     .result {
       display: none; margin-top: 20px; padding: 20px;
       border: 1px solid #302a42; border-radius: 18px;
@@ -56,13 +114,23 @@
     }
     .profile { display: flex; align-items: center; gap: 18px; }
     .avatar-wrap {
-      width: 116px; height: 116px; flex: 0 0 116px; overflow: hidden;
+      position: relative; width: 116px; height: 116px; flex: 0 0 116px;
+      overflow: hidden; display: grid; place-items: center;
       border-radius: 18px; background: #252033; border: 1px solid #41375a;
     }
-    .avatar-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .avatar-wrap::before { content: "R"; position: absolute; color: #8b5cf6; font-size: 32px; font-weight: 800; }
+    .avatar-wrap img { position: relative; width: 100%; height: 100%; object-fit: contain; }
     .details { min-width: 0; }
+    .name-line { display: flex; align-items: center; gap: 8px; }
     .display-name { margin: 0 0 5px; font-size: 21px; overflow-wrap: anywhere; }
     .username { color: #a99bbf; font-size: 14px; overflow-wrap: anywhere; }
+    .star-button {
+      width: 34px; height: 34px; flex: 0 0 34px; padding: 0; margin-top: -5px;
+      border: 1px solid #4a3b61; border-radius: 10px;
+      background: rgba(139,92,246,.12); color: #d6c6f5; font-size: 21px;
+    }
+    .star-button.is-favorite { color: #fbbf24; border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.1); }
+    .star-button:hover { transform: scale(1.05); }
     .verified { color: #a78bfa; font-size: 12px; margin-top: 9px; }
     .meta {
       display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
@@ -79,11 +147,16 @@
     }
     .profile-link:hover { background: rgba(139,92,246,.25); }
     .footer { text-align: center; color: #666174; font-size: 11px; margin-top: 20px; }
-    @keyframes appear { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(7px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     @media (max-width: 440px) {
       .panel { padding: 18px; }
       .search { flex-direction: column; }
-      button { min-height: 48px; }
+      button#searchButton { min-height: 48px; }
       .profile { align-items: flex-start; gap: 13px; }
       .avatar-wrap { width: 94px; height: 94px; flex-basis: 94px; }
       .display-name { font-size: 18px; }
@@ -101,12 +174,27 @@
     <section class="panel">
       <form id="searchForm">
         <label for="username">ROBLOX USERNAME</label>
-        <div class="search">
-          <input id="username" name="username" placeholder="Например: Builderman"
-                 autocomplete="off" maxlength="20" required>
-          <button id="searchButton" type="submit">Найти</button>
+        <div class="search-area">
+          <div class="search">
+            <input id="username" name="username" placeholder="Например: Builderman"
+                   autocomplete="off" maxlength="20" required>
+            <button id="searchButton" type="submit">Найти</button>
+          </div>
+          <div id="suggestions" class="suggestions" role="listbox" aria-label="Похожие пользователи"></div>
         </div>
       </form>
+
+      <div class="toolbar">
+        <button id="savedToggle" class="toolbar-button" type="button" aria-expanded="false">
+          ☆ Сохранённые <span id="savedCount" class="saved-count">0</span>
+        </button>
+      </div>
+
+      <section id="savedPanel" class="saved-panel" aria-label="Сохранённые пользователи">
+        <h3 class="saved-heading">ТВОИ СОХРАНЁННЫЕ ПОЛЬЗОВАТЕЛИ</h3>
+        <div id="savedList" class="saved-list"></div>
+      </section>
+
       <div id="status" class="status" role="status" aria-live="polite"></div>
 
       <article id="result" class="result">
@@ -115,7 +203,11 @@
             <img id="avatar" alt="Аватар пользователя Roblox">
           </div>
           <div class="details">
-            <h2 id="displayName" class="display-name"></h2>
+            <div class="name-line">
+              <h2 id="displayName" class="display-name"></h2>
+              <button id="favoriteButton" class="star-button" type="button"
+                      title="Добавить в сохранённые" aria-label="Добавить в сохранённые" aria-pressed="false">☆</button>
+            </div>
             <div id="handle" class="username"></div>
             <div class="verified">● Профиль Roblox найден</div>
           </div>
@@ -144,40 +236,113 @@
     const button = document.getElementById('searchButton');
     const statusBox = document.getElementById('status');
     const result = document.getElementById('result');
+    const suggestionsBox = document.getElementById('suggestions');
+    const favoriteButton = document.getElementById('favoriteButton');
+    const savedToggle = document.getElementById('savedToggle');
+    const savedPanel = document.getElementById('savedPanel');
+    const savedList = document.getElementById('savedList');
+    const savedCount = document.getElementById('savedCount');
+    const avatarImage = document.getElementById('avatar');
 
-    // Roblox does not currently allow browser pages on other domains to read
-    // its API responses directly. cors.dev relays public GET requests and adds
-    // the CORS headers required by browsers.
     const CORS_PROXY = 'https://proxy.cors.dev/';
+    const FAVORITES_KEY = 'robloxUserFinderFavorites_v1';
+    const COOLDOWN_SECONDS = 60;
+
+    let favorites = loadFavorites();
+    let currentUser = null;
+    let currentAvatarUrl = '';
+    let cooldownUntil = 0;
+    let cooldownInterval = null;
+    let suggestionTimeout = null;
+    let suggestionRequestNumber = 0;
+
+    function loadFavorites() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
+        return Array.isArray(stored) ? stored.filter(user => user && user.id && user.name) : [];
+      } catch (error) {
+        console.warn('Не удалось прочитать сохранённых пользователей:', error);
+        return [];
+      }
+    }
+
+    function saveFavorites() {
+      try {
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+      } catch (error) {
+        setStatus('Браузер не разрешил сохранить список. Проверь настройки хранилища.', true);
+      }
+    }
 
     function setStatus(message, isError = false) {
       statusBox.textContent = message;
       statusBox.className = isError ? 'status error' : 'status';
     }
 
+    function isCoolingDown() {
+      return Date.now() < cooldownUntil;
+    }
+
+    function updateSearchButton() {
+      if (isCoolingDown()) {
+        const seconds = Math.max(1, Math.ceil((cooldownUntil - Date.now()) / 1000));
+        button.disabled = true;
+        button.textContent = `Повтор через ${seconds}с`;
+      } else {
+        button.disabled = false;
+        button.textContent = 'Найти';
+      }
+    }
+
+    function startCooldown() {
+      cooldownUntil = Date.now() + COOLDOWN_SECONDS * 1000;
+      clearInterval(cooldownInterval);
+      updateSearchButton();
+      setStatus(`Не удалось найти пользователя. Повторный поиск будет доступен через ${COOLDOWN_SECONDS} секунд.`, true);
+
+      cooldownInterval = setInterval(() => {
+        if (!isCoolingDown()) {
+          clearInterval(cooldownInterval);
+          cooldownInterval = null;
+          updateSearchButton();
+          setStatus('Можно искать пользователя снова.');
+        } else {
+          updateSearchButton();
+          const seconds = Math.max(1, Math.ceil((cooldownUntil - Date.now()) / 1000));
+          setStatus(`Повторный поиск доступен через ${seconds} сек.`, true);
+        }
+      }, 250);
+    }
+
     async function fetchRoblox(url) {
       const response = await fetch(CORS_PROXY + url, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' }
+        headers: { 'Accept': 'application/json' },
+        credentials: 'omit'
       });
 
       if (!response.ok) {
         if (response.status === 429) {
-          throw new Error('Слишком много запросов. Подожди минуту и попробуй снова.');
+          throw new Error('Roblox или сервис-посредник временно ограничил запросы.');
         }
-        throw new Error(`Сервис поиска вернул ошибку (${response.status}). Попробуй позже.`);
+        throw new Error(`Сервис поиска вернул ошибку (${response.status}).`);
       }
       return response.json();
     }
 
-    async function searchUser(username) {
-      // Roblox's GET search endpoint returns similar names too, so we filter
-      // the results to an exact Username match (case-insensitive).
+    function makeSearchUrl(keyword, limit = 10) {
       const url = new URL('https://users.roblox.com/v1/users/search');
-      url.search = new URLSearchParams({ keyword: username, limit: '10' }).toString();
+      url.search = new URLSearchParams({ keyword, limit: String(limit) }).toString();
+      return url.toString();
+    }
 
-      const data = await fetchRoblox(url.toString());
-      const users = Array.isArray(data.data) ? data.data : [];
+    async function searchUsers(keyword, limit = 10) {
+      const data = await fetchRoblox(makeSearchUrl(keyword, limit));
+      return Array.isArray(data.data) ? data.data : [];
+    }
+
+    async function searchExactUser(username) {
+      const users = await searchUsers(username, 10);
       return users.find(user =>
         typeof user.name === 'string' && user.name.toLowerCase() === username.toLowerCase()
       ) || null;
@@ -194,14 +359,314 @@
 
       const data = await fetchRoblox(url.toString());
       const item = data.data && data.data[0];
+
       if (!item || item.state !== 'Completed' || !item.imageUrl) {
-        throw new Error('Roblox пока не отдал изображение аватара. Попробуй ещё раз позже.');
+        throw new Error('Аватар пока недоступен.');
       }
+
       return item.imageUrl;
     }
 
-    form.addEventListener('submit', async (event) => {
+    function updateFavoriteButton() {
+      if (!currentUser) return;
+
+      const isFavorite = favorites.some(user =>
+        String(user.id) === String(currentUser.id)
+      );
+
+      favoriteButton.textContent = isFavorite ? '★' : '☆';
+      favoriteButton.classList.toggle('is-favorite', isFavorite);
+      favoriteButton.setAttribute('aria-pressed', String(isFavorite));
+      favoriteButton.title = isFavorite ? 'Убрать из сохранённых' : 'Добавить в сохранённые';
+      favoriteButton.setAttribute('aria-label', favoriteButton.title);
+    }
+
+    function showProfile(user, avatarUrl = '') {
+      currentUser = {
+        id: user.id,
+        name: user.name,
+        displayName: user.displayName || user.name
+      };
+
+      currentAvatarUrl = avatarUrl || '';
+
+      document.getElementById('displayName').textContent = currentUser.displayName;
+      document.getElementById('handle').textContent = '@' + currentUser.name;
+      document.getElementById('userId').textContent = currentUser.id;
+      document.getElementById('usernameValue').textContent = currentUser.name;
+      document.getElementById('profileLink').href =
+        `https://www.roblox.com/users/${currentUser.id}/profile`;
+
+      if (currentAvatarUrl) {
+        avatarImage.src = currentAvatarUrl;
+        avatarImage.style.display = 'block';
+      } else {
+        avatarImage.removeAttribute('src');
+        avatarImage.style.display = 'none';
+      }
+
+      updateFavoriteButton();
+      result.style.display = 'block';
+    }
+
+    async function openUser(user, cachedAvatarUrl = '') {
+      suggestionRequestNumber++;
+      input.value = user.name;
+      hideSuggestions();
+
+      if (cachedAvatarUrl) {
+        showProfile(user, cachedAvatarUrl);
+        setStatus('Сохранённый пользователь открыт.');
+        return;
+      }
+
+      setStatus('Загружаем профиль и аватар...');
+      showProfile(user, '');
+
+      try {
+        const avatarUrl = await getAvatar(user.id);
+
+        currentAvatarUrl = avatarUrl;
+        avatarImage.src = avatarUrl;
+        avatarImage.style.display = 'block';
+
+        setStatus('Пользователь успешно найден.');
+
+        if (favorites.some(item => String(item.id) === String(user.id))) {
+          const saved = favorites.find(item =>
+            String(item.id) === String(user.id)
+          );
+
+          saved.avatarUrl = avatarUrl;
+          saveFavorites();
+          renderFavorites();
+        }
+      } catch (error) {
+        console.warn('Не удалось загрузить аватар:', error);
+        setStatus('Профиль найден, но аватар временно недоступен.');
+      }
+    }
+
+    function renderFavorites() {
+      savedCount.textContent = String(favorites.length);
+      savedList.replaceChildren();
+
+      if (favorites.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-saved';
+        empty.textContent = 'Пока никого нет. Найди пользователя и нажми ☆, чтобы сохранить его.';
+        savedList.appendChild(empty);
+        return;
+      }
+
+      favorites.forEach(user => {
+        const row = document.createElement('div');
+        row.className = 'saved-user';
+        row.setAttribute('role', 'button');
+        row.setAttribute('tabindex', '0');
+
+        const image = document.createElement('img');
+        image.className = 'saved-avatar';
+        image.alt = '';
+
+        if (user.avatarUrl) image.src = user.avatarUrl;
+
+        image.onerror = () => {
+          image.style.visibility = 'hidden';
+        };
+
+        const info = document.createElement('div');
+        info.className = 'saved-user-info';
+
+        const display = document.createElement('span');
+        display.className = 'saved-display';
+        display.textContent = user.displayName || user.name;
+
+        const username = document.createElement('span');
+        username.className = 'saved-username';
+        username.textContent = '@' + user.name;
+
+        info.append(display, username);
+
+        const remove = document.createElement('button');
+        remove.className = 'remove-saved';
+        remove.type = 'button';
+        remove.textContent = '×';
+        remove.title = 'Удалить из сохранённых';
+        remove.setAttribute('aria-label', `Удалить ${user.name} из сохранённых`);
+
+        remove.addEventListener('click', event => {
+          event.stopPropagation();
+
+          favorites = favorites.filter(item =>
+            String(item.id) !== String(user.id)
+          );
+
+          saveFavorites();
+          renderFavorites();
+
+          if (currentUser && String(currentUser.id) === String(user.id)) {
+            updateFavoriteButton();
+          }
+        });
+
+        const openSaved = () => openUser(user, user.avatarUrl || '');
+
+        row.addEventListener('click', openSaved);
+
+        row.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openSaved();
+          }
+        });
+
+        row.append(image, info, remove);
+        savedList.appendChild(row);
+      });
+    }
+
+    function hideSuggestions() {
+      suggestionsBox.style.display = 'none';
+      suggestionsBox.replaceChildren();
+    }
+
+    function showSuggestionMessage(message) {
+      suggestionsBox.replaceChildren();
+
+      const note = document.createElement('div');
+      note.className = 'suggestion-note';
+      note.textContent = message;
+
+      suggestionsBox.appendChild(note);
+      suggestionsBox.style.display = 'block';
+    }
+
+    function renderSuggestions(users, keyword) {
+      suggestionsBox.replaceChildren();
+
+      if (!users.length) {
+        showSuggestionMessage('Похожих пользователей не найдено.');
+        return;
+      }
+
+      const heading = document.createElement('div');
+      heading.className = 'suggestion-note';
+      heading.textContent = 'Похожие пользователи. Нажми на нужного:';
+      suggestionsBox.appendChild(heading);
+
+      users.slice(0, 8).forEach(user => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'suggestion-item';
+        item.setAttribute('role', 'option');
+
+        const avatar = document.createElement('span');
+        avatar.className = 'suggestion-avatar';
+        avatar.textContent = (user.displayName || user.name || '?')
+          .slice(0, 1).toUpperCase();
+
+        const names = document.createElement('span');
+        names.className = 'suggestion-names';
+
+        const display = document.createElement('span');
+        display.className = 'suggestion-display';
+        display.textContent = user.displayName || user.name;
+
+        const username = document.createElement('span');
+        username.className = 'suggestion-username';
+        username.textContent = '@' + user.name;
+
+        names.append(display, username);
+        item.append(avatar, names);
+
+        item.addEventListener('click', () => openUser(user));
+        suggestionsBox.appendChild(item);
+      });
+
+      suggestionsBox.style.display = 'block';
+    }
+
+    async function loadSuggestions(keyword) {
+      const requestNumber = ++suggestionRequestNumber;
+      showSuggestionMessage('Ищем похожие имена...');
+
+      try {
+        const users = await searchUsers(keyword, 10);
+
+        if (
+          requestNumber !== suggestionRequestNumber ||
+          input.value.trim() !== keyword
+        ) return;
+
+        renderSuggestions(users, keyword);
+      } catch (error) {
+        if (requestNumber !== suggestionRequestNumber) return;
+
+        showSuggestionMessage('Подсказки временно недоступны.');
+        console.warn('Ошибка подсказок Roblox:', error);
+      }
+    }
+
+    input.addEventListener('input', () => {
+      clearTimeout(suggestionTimeout);
+
+      const keyword = input.value.trim();
+
+      if (keyword.length < 2) {
+        suggestionRequestNumber++;
+        hideSuggestions();
+        return;
+      }
+
+      suggestionTimeout = setTimeout(() => {
+        loadSuggestions(keyword);
+      }, 450);
+    });
+
+    document.addEventListener('click', event => {
+      if (!event.target.closest('.search-area')) {
+        hideSuggestions();
+      }
+    });
+
+    favoriteButton.addEventListener('click', () => {
+      if (!currentUser) return;
+
+      const exists = favorites.some(user =>
+        String(user.id) === String(currentUser.id)
+      );
+
+      if (exists) {
+        favorites = favorites.filter(user =>
+          String(user.id) !== String(currentUser.id)
+        );
+
+        setStatus('Пользователь удалён из сохранённых.');
+      } else {
+        favorites.unshift({
+          ...currentUser,
+          avatarUrl: currentAvatarUrl
+        });
+
+        setStatus('Пользователь добавлен в сохранённые.');
+      }
+
+      saveFavorites();
+      renderFavorites();
+      updateFavoriteButton();
+    });
+
+    savedToggle.addEventListener('click', () => {
+      const isOpen = savedPanel.style.display === 'block';
+
+      savedPanel.style.display = isOpen ? 'none' : 'block';
+      savedToggle.setAttribute('aria-expanded', String(!isOpen));
+    });
+
+    form.addEventListener('submit', async event => {
       event.preventDefault();
+
       const username = input.value.trim();
 
       if (!username) {
@@ -209,44 +674,66 @@
         return;
       }
 
+      if (isCoolingDown()) {
+        updateSearchButton();
+        return;
+      }
+
+      clearTimeout(suggestionTimeout);
+      suggestionRequestNumber++;
+      hideSuggestions();
+
       button.disabled = true;
       button.textContent = 'Поиск...';
       result.style.display = 'none';
+
       setStatus('Ищем пользователя в Roblox...');
 
       try {
-        const user = await searchUser(username);
+        const user = await searchExactUser(username);
 
         if (!user) {
-          setStatus('Пользователь с таким Username не найден. Проверь написание.', true);
+          startCooldown();
           return;
         }
 
-        setStatus('Загружаем аватар...');
-        const avatarUrl = await getAvatar(user.id);
+        showProfile(user, '');
+        setStatus('Пользователь найден. Загружаем аватар...');
 
-        document.getElementById('avatar').src = avatarUrl;
-        document.getElementById('displayName').textContent = user.displayName || user.name;
-        document.getElementById('handle').textContent = '@' + user.name;
-        document.getElementById('userId').textContent = user.id;
-        document.getElementById('usernameValue').textContent = user.name;
-        document.getElementById('profileLink').href = `https://www.roblox.com/users/${user.id}/profile`;
+        try {
+          const avatarUrl = await getAvatar(user.id);
 
-        result.style.display = 'block';
-        setStatus('Пользователь успешно найден.');
+          currentAvatarUrl = avatarUrl;
+          avatarImage.src = avatarUrl;
+          avatarImage.style.display = 'block';
+
+          if (favorites.some(item => String(item.id) === String(user.id))) {
+            const saved = favorites.find(item =>
+              String(item.id) === String(user.id)
+            );
+
+            saved.avatarUrl = avatarUrl;
+            saveFavorites();
+            renderFavorites();
+          }
+
+          setStatus('Пользователь успешно найден.');
+        } catch (avatarError) {
+          console.warn('Аватар временно недоступен:', avatarError);
+          setStatus('Пользователь найден, но аватар временно недоступен.');
+        }
+
       } catch (error) {
         console.error('Roblox User Finder:', error);
-        setStatus(
-          error instanceof TypeError
-            ? 'Не удалось связаться с сервисом-посредником. Проверь интернет или попробуй позже.'
-            : error.message,
-          true
-        );
+        startCooldown();
       } finally {
-        button.disabled = false;
-        button.textContent = 'Найти';
+        if (!isCoolingDown()) {
+          updateSearchButton();
+        }
       }
     });
+
+    renderFavorites();
   </script>
 </body>
 </html>
